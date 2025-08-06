@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
+let panel: vscode.WebviewPanel | undefined;
+
 export function activate(context: vscode.ExtensionContext) {
-  // Listen for any change in diagnostics (errors, warnings)
   const diag = vscode.languages.onDidChangeDiagnostics(() => {
     const allDiagnostics = vscode.languages.getDiagnostics();
     let errorCount = 0;
@@ -11,13 +12,9 @@ export function activate(context: vscode.ExtensionContext) {
       errorCount += diags.filter(d => d.severity === vscode.DiagnosticSeverity.Error).length;
     });
 
-    // Debug popup to confirm it’s triggering
     vscode.window.showInformationMessage(`Triggered: ${errorCount} errors`);
 
-    // Pick a meme file based on error count
-    let meme = getMemeForBugCount(errorCount);
-
-    // Show the meme in a new webview tab
+    const meme = getMemeForBugCount(errorCount);
     showMeme(context, meme);
   });
 
@@ -25,29 +22,29 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function showMeme(context: vscode.ExtensionContext, memeFile: string) {
-  const panel = vscode.window.createWebviewPanel(
-    'bugMeme',
-    'Bug Meme',
-    vscode.ViewColumn.Two,
-    {
-      enableScripts: true,
-      localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'memes'))]
-    }
-  );
+  // Reuse panel if it already exists
+  if (panel) {
+    const memePath = vscode.Uri.file(path.join(context.extensionPath, 'memes', memeFile));
+    const memeSrc = panel.webview.asWebviewUri(memePath);
+    panel.webview.html = `<html><body><img src="${memeSrc}" style="width:100%;"></body></html>`;
+    panel.webview.postMessage({ type: 'update', memeSrc });
 
-  const memePath = vscode.Uri.file(
-    path.join(context.extensionPath, 'memes', memeFile)
-  );
+  } else {
+    panel = vscode.window.createWebviewPanel(
+      'bugMeme',
+      'Bug Meme',
+      vscode.ViewColumn.Two,
+      {}
+    );
 
-  const memeSrc = panel.webview.asWebviewUri(memePath);
+    const memePath = vscode.Uri.file(path.join(context.extensionPath, 'memes', memeFile));
+    const memeSrc = panel.webview.asWebviewUri(memePath);
+    panel.webview.html = `<html><body><img src="${memeSrc}" style="width:100%;"></body></html>`;
 
-  panel.webview.html = `
-    <html>
-      <body style="margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: black;">
-        <img src="${memeSrc}" style="max-width: 100%; max-height: 100%;" />
-      </body>
-    </html>
-  `;
+    panel.onDidDispose(() => {
+      panel = undefined; // Reset when closed
+    });
+  }
 }
 
 function getMemeForBugCount(count: number): string {

@@ -2,7 +2,7 @@
   "name": "bug-meme-roaster",
   "displayName": "bug-meme-roaster",
   "description": "Roasts you based on the number of bugs your program has",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.102.0"
   },
@@ -10,9 +10,17 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "onStartupFinished",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:python",
+    "onLanguage:java"
   ],
   "main": "./out/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dhrutiv1129/bug-meme-roaster.git"
+  },
   "contributes": {},
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -34,3 +42,4 @@
     "@vscode/test-electron": "^2.5.2"
   }
 }
+
