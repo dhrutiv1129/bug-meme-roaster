@@ -1,12 +1,12 @@
 # Bug Meme Roaster
 
-Roasts you based on the number of bugs your program has. Because why not get roasted *and* debug?
+Roasts you based on the number of bugs your program has. 
 
 ## Features
 
 - Watches your code for errors in real-time.
-- Pops up hilarious meme images based on how many bugs you have.
-- Keeps your morale *questionably* high while coding.
+- Pops up images from The Incredibles based on how many bugs you have.
+- Keeps your morale questionably high while coding.
 
 ## Installation
 
